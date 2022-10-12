@@ -67,7 +67,8 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddDbContext<CatalogDbContext>((provider, options) =>
             {
                 var configuration = provider.GetRequiredService<IConfiguration>();
-                options.UseSqlServer(configuration.GetConnectionString(ModuleInfo.Id) ?? configuration.GetConnectionString("VirtoCommerce"));
+                options.UseMySql(configuration.GetConnectionString(ModuleInfo.Id) ?? configuration.GetConnectionString("VirtoCommerce"),
+                                 new MySqlServerVersion(new Version(5, 7)));
             });
             serviceCollection.AddTransient<ICatalogRepository, CatalogRepositoryImpl>();
             serviceCollection.AddTransient<Func<ICatalogRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICatalogRepository>());
@@ -244,7 +245,7 @@ namespace VirtoCommerce.CatalogModule.Web
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var catalogDbContext = serviceScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-                catalogDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
+                //catalogDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                 catalogDbContext.Database.EnsureCreated();
                 catalogDbContext.Database.Migrate();
             }
