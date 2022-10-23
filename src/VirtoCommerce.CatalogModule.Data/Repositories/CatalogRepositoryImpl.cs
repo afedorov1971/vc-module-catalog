@@ -368,32 +368,32 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 {
                     const string commandTemplate = @"
                         DELETE SEO FROM CatalogSeoInfo SEO INNER JOIN Item I ON I.Id = SEO.ItemId
-                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
+                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0});
 
                         DELETE CR FROM CategoryItemRelation  CR INNER JOIN Item I ON I.Id = CR.ItemId
-                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
+                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0});
 
                         DELETE CI FROM CatalogImage CI INNER JOIN Item I ON I.Id = CI.ItemId
-                        WHERE I.Id IN ({0})  OR I.ParentId IN ({0})
+                        WHERE I.Id IN ({0})  OR I.ParentId IN ({0});
 
                         DELETE CA FROM CatalogAsset CA INNER JOIN Item I ON I.Id = CA.ItemId
-                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
+                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0});
 
                         DELETE PV FROM PropertyValue PV INNER JOIN Item I ON I.Id = PV.ItemId
-                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
+                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0});
 
                         DELETE ER FROM EditorialReview ER INNER JOIN Item I ON I.Id = ER.ItemId
-                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
+                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0});
 
                         DELETE A FROM Association A INNER JOIN Item I ON I.Id = A.ItemId
-                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
+                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0});
 
                         DELETE A FROM Association A INNER JOIN Item I ON I.Id = A.AssociatedItemId
-                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
+                        WHERE I.Id IN ({0}) OR I.ParentId IN ({0});
 
-                        DELETE  FROM Item  WHERE ParentId IN ({0})
+                        DELETE  FROM Item  WHERE ParentId IN ({0});
 
-                        DELETE  FROM Item  WHERE Id IN ({0})
+                        DELETE  FROM Item  WHERE Id IN ({0});
                     ";
 
                     await ExecuteStoreQueryAsync(commandTemplate, itemIds.Skip(skip).Take(batchSize));
