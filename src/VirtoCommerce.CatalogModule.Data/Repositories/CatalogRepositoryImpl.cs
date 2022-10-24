@@ -550,19 +550,29 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         /// </summary>
         public virtual async Task<ICollection<CategoryEntity>> SearchCategoriesHierarchyAsync(string categoryId)
         {
+            //var commandTemplate = @"
+            //    WITH CategoryParents AS   
+            //    (  
+            //        SELECT * 
+            //        FROM Category   
+            //        WHERE Id = @categoryId
+            //        UNION ALL  
+            //        SELECT c.*
+            //        FROM Category c, CategoryParents cp
+            //     where c.Id = cp.ParentCategoryId 
+            //    )  
+            //    SELECT *
+            //    FROM CategoryParents";
+
             var commandTemplate = @"
-                WITH CategoryParents AS   
-                (  
-                    SELECT * 
-                    FROM Category   
-                    WHERE Id = @categoryId
-                    UNION ALL  
-                    SELECT c.*
-                    FROM Category c, CategoryParents cp
-	                where c.Id = cp.ParentCategoryId 
-                )  
-                SELECT *
-                FROM CategoryParents";
+                     SELECT t2.* FROM (
+                     SELECT @r AS _id,
+                          (SELECT @r := ParentCategoryId FROM Category WHERE Id = _id) AS _parent_id,
+                          @l := @l + 1 AS level
+                     FROM (SELECT @r := @categoryId, @l := 0) val, Category
+                     WHERE @r IS NOT NULL ) t1
+                     JOIN Category t2
+                     ON t1._id = t2.Id";
 
             var categoryIdParam = new MySqlParameter("@categoryId", categoryId);
             var result = await DbContext.Set<CategoryEntity>().FromSqlRaw(commandTemplate, categoryIdParam).ToListAsync();
