@@ -339,24 +339,45 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
         public virtual async Task<string[]> GetAllChildrenCategoriesIdsAsync(string[] categoryIds)
         {
-            string[] result = null;
+            //string[] result = null;
 
-            if (!categoryIds.IsNullOrEmpty())
+            //if (!categoryIds.IsNullOrEmpty())
+            //{
+            //    const string commandTemplate = @"
+            //        WITH cte AS (
+            //            SELECT a.Id FROM Category a  WHERE Id IN ({0})
+            //            UNION ALL
+            //            SELECT a.Id FROM Category a JOIN cte c ON a.ParentCategoryId = c.Id
+            //        )
+            //        SELECT Id FROM cte WHERE Id NOT IN ({0})
+            //    ";
+
+            //    var getAllChildrenCategoriesCommand = CreateCommand(commandTemplate, categoryIds);
+            //    result = await DbContext.ExecuteArrayAsync<string>(getAllChildrenCategoriesCommand.Text, getAllChildrenCategoriesCommand.Parameters.ToArray());
+            //}
+
+            var result = new HashSet<string>();
+
+            return await Task.Run(() =>
             {
-                const string commandTemplate = @"
-                    WITH cte AS (
-                        SELECT a.Id FROM Category a  WHERE Id IN ({0})
-                        UNION ALL
-                        SELECT a.Id FROM Category a JOIN cte c ON a.ParentCategoryId = c.Id
-                    )
-                    SELECT Id FROM cte WHERE Id NOT IN ({0})
-                ";
+                var nextLevelCategories = new HashSet<string>(categoryIds);
 
-                var getAllChildrenCategoriesCommand = CreateCommand(commandTemplate, categoryIds);
-                result = await DbContext.ExecuteArrayAsync<string>(getAllChildrenCategoriesCommand.Text, getAllChildrenCategoriesCommand.Parameters.ToArray());
-            }
+                while (nextLevelCategories.Count > 0)
+                {
+                    var nextLevelResult = Categories.Where(item => nextLevelCategories.Contains(item.ParentCategoryId)).Select(item => item.Id);
 
-            return result ?? new string[0];
+                    //var getAllChildrenCategoriesCommand = CreateCommand(commandTemplate, nextLevelCategories);
+                    //var nextLevelResult =
+                    //    await ExecuteArrayTestAsync<string>(DbContext, getAllChildrenCategoriesCommand.Text, getAllChildrenCategoriesCommand.Parameters.ToArray());
+
+                    result.UnionWith(nextLevelResult);
+                    nextLevelCategories.Clear();
+                    nextLevelCategories.UnionWith(nextLevelResult);
+                }
+                return result.ToArray();
+            });
+
+            //return result ?? new string[0];
         }
 
         public virtual async Task RemoveItemsAsync(string[] itemIds)
